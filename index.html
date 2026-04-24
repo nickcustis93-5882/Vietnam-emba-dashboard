@@ -42,7 +42,7 @@
 
     <div id="loader" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-vn-red mb-4"></div>
-        <p class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Initializing Data Models...</p>
+        <p class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Compiling World Bank Data...</p>
     </div>
 
     <div class="max-w-[1400px] mx-auto space-y-5 opacity-0 transition-opacity duration-1000" id="app-container">
@@ -73,14 +73,14 @@
                 <span class="text-xs text-gray-500 mt-1 font-medium" id="kpiSub1">Share of Gross Exports</span>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Trade Openness (Risk Anchor)</span>
-                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-gdp-ratio">--</span>
-                <span class="text-xs text-gray-500 mt-1 font-medium">Avg Exports as % of GDP</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Avg Trade Openness</span>
+                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-trade-gdp">--</span>
+                <span class="text-xs text-gray-500 mt-1 font-medium">Trade as % of GDP (WB Data)</span>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
-                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Avg Real GDP Growth</span>
-                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-gdp-growth">--</span>
-                <span class="text-xs text-gray-500 mt-1 font-medium">Macroeconomic baseline</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Market Exposure</span>
+                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-target-exposure">--</span>
+                <span class="text-xs text-gray-500 mt-1 font-medium" id="kpi-target-label">United States share</span>
             </div>
             <div class="bg-red-50 rounded-xl shadow-sm p-4 border border-red-200">
                 <span class="text-[10px] font-bold text-vn-darkred uppercase tracking-wider" id="kpiLossLabel">Simulated Annual Loss</span>
@@ -147,20 +147,20 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     
-                    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200 relative group">
+                    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200 relative group flex flex-col">
                         <div class="absolute top-2 right-2 bg-slate-800 text-white text-[9px] font-bold px-2 py-1 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity">Click to Filter Target</div>
                         <h2 class="text-sm font-bold text-slate-800 mb-1">Geopolitical Markets</h2>
                         <p class="text-[10px] text-gray-500 mb-2">Click a slice to apply the Stress Test.</p>
-                        <div class="relative h-48 w-full flex justify-center">
+                        <div class="relative h-48 w-full flex justify-center mt-auto">
                             <canvas id="destinationChart"></canvas>
                         </div>
                     </div>
 
                     <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200 flex flex-col">
-                        <h2 class="text-sm font-bold text-slate-800 mb-1">Macro Resilience: Growth vs Net Margin</h2>
-                        <p class="text-[10px] text-gray-500 mb-2">Despite huge export volumes, heavy import reliance keeps Current Account (Net Margin) thin.</p>
-                        <div class="relative h-48 w-full">
-                            <canvas id="imfChart"></canvas>
+                        <h2 class="text-sm font-bold text-slate-800 mb-1">WB Macro Indicators: Tech vs Growth</h2>
+                        <p class="text-[10px] text-gray-500 mb-2">Tracking High-Tech Export percentage alongside GDP Growth.</p>
+                        <div class="relative h-48 w-full mt-auto">
+                            <canvas id="macroChart"></canvas>
                         </div>
                     </div>
 
@@ -169,8 +169,8 @@
         </div>
 
         <footer class="mt-4 pt-4 border-t border-gray-300 pb-6 text-[10px] text-gray-500">
-            <h4 class="font-bold text-gray-700 uppercase tracking-wide mb-1">Data Sourcing</h4>
-            <p><strong>WTO:</strong> Merchandise exports by product group. <strong>UNCTAD:</strong> FDI inward/outward flows & WIR 2025. <strong>World Bank:</strong> GDP for Trade Openness. <strong>IMF (WEO 2025):</strong> Real GDP Growth & Current Account Balance (% of GDP). <strong>GSO:</strong> FIE DVA modeled structurally at ~25% (assembly); Domestic DVA ~65%.</p>
+            <h4 class="font-bold text-gray-700 uppercase tracking-wide mb-1">Data Sourcing & Metadata</h4>
+            <p><strong>World Bank:</strong> Series [BX.KLT.DINV.CD.WD] (FDI net inflows); [TX.VAL.TECH.MF.ZS] (High-tech exports); [NE.TRD.GNFS.ZS] (Trade % of GDP); [NY.GDP.MKTP.KD.ZG] (GDP growth annual). <strong>WTO:</strong> Merchandise exports by product group. <strong>UNCTAD:</strong> WIR 2025 Fact Sheet. <strong>GSO:</strong> FIE DVA modeled structurally at ~25% (assembly); Domestic DVA ~65%.</p>
         </footer>
     </div>
 
@@ -182,11 +182,11 @@
                     total: [176581, 215014, 243699, 264268, 282629, 335978, 371288, 353782, 404824],
                     fie:   [126000, 154000, 174000, 190000, 203000, 241000, 267000, 254000, 290000],
                     dom:   [50581, 61014, 69699, 74268, 79629, 94978, 104288, 99782, 114824],
-                    gdp:   [205300, 223800, 245200, 261900, 271200, 366100, 409000, 429700, 469600],
                     usShare: [0.21, 0.20, 0.19, 0.23, 0.27, 0.28, 0.29, 0.28, 0.29],
-                    // NEW IMF DATA
-                    imfGdpGrowth: [6.69, 6.94, 7.47, 7.36, 2.87, 2.55, 8.54, 5.07, 7.09],
-                    imfCurrentAccount: [0.25, -0.60, 1.90, 3.76, 4.35, -2.20, 0.34, 5.91, 6.10]
+                    // NEW WORLD BANK DATA
+                    tradeToGdp: [145.4, 161.0, 164.7, 164.7, 163.2, 186.7, 183.2, 164.8, 173.9],
+                    highTechPct: [38.1, 41.7, 40.8, 40.4, 41.7, 41.5, 42.7, 44.3, 44.3],
+                    gdpGrowth: [6.69, 6.94, 7.47, 7.36, 2.87, 2.55, 8.54, 5.07, 7.09]
                 },
                 economics: { isDvaMode: false, dvaMultiplierFIE: 0.25, dvaMultiplierDom: 0.65 },
                 filters: { startYear: 2016, endYear: 2024, targetRegion: 'United States', shockPct: 0 },
@@ -207,8 +207,8 @@
                         this.initCharts();
                         this.bindEvents();
                         this.update();
-                    }, 500);
-                }, 600);
+                    }, 300);
+                }, 500);
             },
 
             buildUI: function() {
@@ -256,8 +256,8 @@
                     }
                 });
 
-                // NEW IMF Chart Instance
-                this.state.charts.imf = new Chart(document.getElementById('imfChart').getContext('2d'), {
+                // WORLD BANK MACRO CHART
+                this.state.charts.macro = new Chart(document.getElementById('macroChart').getContext('2d'), {
                     type: 'bar',
                     data: { labels: [], datasets: [] },
                     options: {
@@ -265,8 +265,8 @@
                         interaction: { mode: 'index', intersect: false },
                         plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6, font: {size: 10} } } },
                         scales: {
-                            y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'Growth %', font: {size: 9}} },
-                            y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: {display: true, text: 'Margin %', font: {size: 9}} },
+                            y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'Growth %', font: {size: 9}}, grid: { display: false } },
+                            y1: { type: 'linear', display: true, position: 'right', title: {display: true, text: 'High-Tech %', font: {size: 9}} },
                             x: { grid: { display: false } }
                         }
                     }
@@ -315,24 +315,24 @@
                 const sliceFie = this.state.data.fie.slice(sIdx, eIdx + 1).map(v => isDvaMode ? v * dvaMultiplierFIE : v);
                 const sliceDom = this.state.data.dom.slice(sIdx, eIdx + 1).map(v => isDvaMode ? v * dvaMultiplierDom : v);
                 const sliceTotal = sliceFie.map((v, i) => v + sliceDom[i]); 
-                const sliceGdp = this.state.data.gdp.slice(sIdx, eIdx + 1);
+                
+                // WB Data Slices
                 const sliceUsShare = this.state.data.usShare.slice(sIdx, eIdx + 1);
-                const sliceImfGrowth = this.state.data.imfGdpGrowth.slice(sIdx, eIdx + 1);
-                const sliceImfCurrentAcct = this.state.data.imfCurrentAccount.slice(sIdx, eIdx + 1);
+                const sliceTradeGdp = this.state.data.tradeToGdp.slice(sIdx, eIdx + 1);
+                const sliceHighTech = this.state.data.highTechPct.slice(sIdx, eIdx + 1);
+                const sliceGrowth = this.state.data.gdpGrowth.slice(sIdx, eIdx + 1);
 
-                let sumFiePct = 0, sumTotal = 0, sumUsShare = 0, sumGdp = 0, sumGrowth = 0;
+                let sumFiePct = 0, sumTotal = 0, sumUsShare = 0, sumTradeGdp = 0;
                 for(let i=0; i<sliceTotal.length; i++) {
                     sumFiePct += (sliceFie[i] / sliceTotal[i]) * 100;
                     sumTotal += sliceTotal[i];
                     sumUsShare += sliceUsShare[i];
-                    sumGdp += sliceGdp[i];
-                    sumGrowth += sliceImfGrowth[i];
+                    sumTradeGdp += sliceTradeGdp[i];
                 }
                 const avgAnnualTotal = sumTotal / sliceTotal.length;
                 const avgUsShare = sumUsShare / sliceUsShare.length;
                 const avgFiePct = (sumFiePct / sliceTotal.length);
-                const tradeOpennessPct = (sumTotal / sumGdp) * 100;
-                const avgGdpGrowth = (sumGrowth / sliceTotal.length);
+                const avgTradeGdp = sumTradeGdp / sliceTradeGdp.length;
 
                 const weights = { ...this.state.geopolitics.baseWeights };
                 weights['United States'] = avgUsShare;
@@ -342,18 +342,18 @@
                 const lossAmount = avgAnnualTotal * currentActiveShare * shockPct; 
                 const sliceStressedTotal = shockPct > 0 ? sliceTotal.map(v => v - (v * currentActiveShare * shockPct)) : [];
 
-                this.renderDOM(avgFiePct, tradeOpennessPct, avgGdpGrowth, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode);
-                this.renderCharts(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceImfGrowth, sliceImfCurrentAcct, weights, targetRegion, isDvaMode, shockPct);
+                this.renderDOM(avgFiePct, avgTradeGdp, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode);
+                this.renderCharts(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceGrowth, sliceHighTech, weights, targetRegion, isDvaMode, shockPct);
             },
 
-            renderDOM: function(avgFiePct, tradeOpennessPct, avgGdpGrowth, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode) {
+            renderDOM: function(avgFiePct, avgTradeGdp, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode) {
                 document.getElementById('activeRegionLabel').innerText = targetRegion;
                 document.getElementById('activeRegionLabel').style.borderColor = this.state.geopolitics.colors[targetRegion];
                 document.getElementById('shockValue').innerText = '-' + (shockPct * 100) + '%';
+                document.getElementById('exposureNote').innerText = `Target market accounts for ~${(currentActiveShare * 100).toFixed(1)}% of exports.`;
                 
                 document.getElementById('kpi-fie-share').innerText = avgFiePct.toFixed(1) + '%';
-                document.getElementById('kpi-gdp-ratio').innerText = tradeOpennessPct.toFixed(1) + '%';
-                document.getElementById('kpi-gdp-growth').innerText = avgGdpGrowth.toFixed(2) + '%';
+                document.getElementById('kpi-trade-gdp').innerText = avgTradeGdp.toFixed(1) + '%';
                 document.getElementById('kpi-target-exposure').innerText = (currentActiveShare * 100).toFixed(1) + '%';
                 document.getElementById('kpi-loss').innerText = '$' + (lossAmount / 1000).toFixed(2) + ' B';
 
@@ -361,8 +361,9 @@
                 document.getElementById('kpiLabel1').innerText = isDvaMode ? 'FIE Share of Value Added' : 'Avg FIE Export Dominance';
             },
 
-            renderCharts: function(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceImfGrowth, sliceImfCurrentAcct, weights, targetRegion, isDvaMode, shockPct) {
+            renderCharts: function(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceGrowth, sliceHighTech, weights, targetRegion, isDvaMode, shockPct) {
                 
+                // CHART 1
                 const datasets = [
                     { label: 'Total Exports (Historical Baseline)', data: sliceTotal, borderColor: '#475569', backgroundColor: 'transparent', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0 },
                     { label: 'FIE Exports', data: sliceFie, backgroundColor: isDvaMode ? 'rgba(218, 37, 29, 0.2)' : 'rgba(218, 37, 29, 0.6)', borderColor: '#DA251D', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 1 },
@@ -387,21 +388,22 @@
                 this.state.charts.ownership.data = { labels: labels, datasets: datasets };
                 this.state.charts.ownership.update();
 
+                // CHART 2
                 this.state.charts.dest.data.datasets[0].data = [
                     (weights['United States']*100).toFixed(1), (weights['China']*100).toFixed(1), (weights['European Union']*100).toFixed(1), 
                     (weights['ASEAN']*100).toFixed(1), (weights['Rest of World']*100).toFixed(1)
                 ];
                 this.state.charts.dest.update();
 
-                // IMF Macro Chart
-                this.state.charts.imf.data = {
+                // CHART 3 (WB MACRO)
+                this.state.charts.macro.data = {
                     labels: labels,
                     datasets: [
-                        { label: 'Real GDP Growth (%)', data: sliceImfGrowth, type: 'line', borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 2, yAxisID: 'y', tension: 0.3, pointRadius: 3 },
-                        { label: 'Current Acct Balance (% of GDP)', data: sliceImfCurrentAcct, type: 'bar', backgroundColor: '#94a3b8', yAxisID: 'y1', barPercentage: 0.5 }
+                        { label: 'GDP Growth (%)', data: sliceGrowth, type: 'line', borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 2, yAxisID: 'y', tension: 0.3, pointRadius: 3 },
+                        { label: 'High-Tech Exports (% of Mfg)', data: sliceHighTech, type: 'bar', backgroundColor: '#94a3b8', yAxisID: 'y1', barPercentage: 0.6 }
                     ]
                 };
-                this.state.charts.imf.update();
+                this.state.charts.macro.update();
             }
         };
 
