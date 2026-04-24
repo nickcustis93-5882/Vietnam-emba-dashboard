@@ -198,7 +198,6 @@
                     fie:   [126000, 154000, 174000, 190000, 203000, 241000, 267000, 254000, 290000],
                     dom:   [50581, 61014, 69699, 74268, 79629, 94978, 104288, 99782, 114824],
                     usShare: [0.21, 0.20, 0.19, 0.23, 0.27, 0.28, 0.29, 0.28, 0.29],
-                    // WORLD BANK DATA
                     tradeToGdp: [145.4, 161.0, 164.7, 164.7, 163.2, 186.7, 183.2, 164.8, 173.9],
                     highTechPct: [38.1, 41.7, 40.8, 40.4, 41.7, 41.5, 42.7, 44.3, 44.3],
                     gdpGrowth: [6.69, 6.94, 7.47, 7.36, 2.87, 2.55, 8.54, 5.07, 7.09]
@@ -247,7 +246,15 @@
                         responsive: true, maintainAspectRatio: false, 
                         interaction: { mode: 'index', intersect: false }, 
                         plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6, font: {size: 11} } } },
-                        scales: { y: { beginAtZero: true, grid: { color: '#e2e8f0' } }, x: { grid: { display: false } } } 
+                        scales: { 
+                            // Y-AXIS LABEL ADDED HERE
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: '#e2e8f0' },
+                                title: { display: true, text: 'Millions USD', font: { size: 11, weight: 'bold' } }
+                            }, 
+                            x: { grid: { display: false } } 
+                        } 
                     }
                 });
 
@@ -394,10 +401,11 @@
 
             renderCharts: function(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceGrowth, sliceHighTech, weights, targetRegion, isDvaMode, shockPct) {
                 
+                // COLOR UPDATE: Blue used for Domestic Exports for high contrast
                 const datasets = [
                     { label: 'Total Exports (Historical Baseline)', data: sliceTotal, borderColor: '#475569', backgroundColor: 'transparent', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0 },
-                    { label: 'FIE Exports', data: sliceFie, backgroundColor: isDvaMode ? 'rgba(218, 37, 29, 0.2)' : 'rgba(218, 37, 29, 0.6)', borderColor: '#DA251D', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 1 },
-                    { label: 'Domestic Exports', data: sliceDom, backgroundColor: isDvaMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(148, 163, 184, 0.4)', borderColor: isDvaMode ? '#10b981' : '#94a3b8', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 1 }
+                    { label: 'FIE Exports', data: sliceFie, backgroundColor: isDvaMode ? 'rgba(218, 37, 29, 0.2)' : 'rgba(218, 37, 29, 0.7)', borderColor: '#DA251D', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2 },
+                    { label: 'Domestic Exports', data: sliceDom, backgroundColor: isDvaMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)', borderColor: isDvaMode ? '#10b981' : '#3b82f6', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2 }
                 ];
 
                 if (shockPct > 0) {
