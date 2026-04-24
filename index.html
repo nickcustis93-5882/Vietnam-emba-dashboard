@@ -78,9 +78,9 @@
                 <span class="text-xs text-gray-500 mt-1 font-medium">Avg Exports as % of GDP</span>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Market Exposure</span>
-                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-target-exposure">--</span>
-                <span class="text-xs text-gray-500 mt-1 font-medium" id="kpi-target-label">United States share</span>
+                <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Avg Real GDP Growth</span>
+                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-gdp-growth">--</span>
+                <span class="text-xs text-gray-500 mt-1 font-medium">Macroeconomic baseline</span>
             </div>
             <div class="bg-red-50 rounded-xl shadow-sm p-4 border border-red-200">
                 <span class="text-[10px] font-bold text-vn-darkred uppercase tracking-wider" id="kpiLossLabel">Simulated Annual Loss</span>
@@ -139,8 +139,8 @@
                 
                 <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200">
                     <h2 class="text-base font-bold text-slate-800" id="chart1Title">Export Ownership vs. Stress Scenario</h2>
-                    <p class="text-xs text-gray-500 mb-3" id="chart1Sub">Simulator overlays a dashed line dropping from the Historical Total.</p>
-                    <div class="relative h-72 w-full">
+                    <p class="text-[11px] text-gray-500 mb-3" id="chart1Sub">Simulator overlays a dashed line dropping from the Historical Total.</p>
+                    <div class="relative h-64 w-full">
                         <canvas id="ownershipChart"></canvas>
                     </div>
                 </div>
@@ -156,14 +156,12 @@
                         </div>
                     </div>
 
-                    <div class="bg-slate-800 rounded-xl shadow-sm p-5 border border-slate-700 text-white flex flex-col justify-center">
-                        <h2 class="text-sm font-bold text-vn-gold mb-3 flex items-center uppercase tracking-wider">
-                            <svg class="w-4 h-4 mr-2 text-vn-gold" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"></path><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"></path></svg>
-                            Dynamic Executive Insight
-                        </h2>
-                        <p class="text-sm text-gray-300 leading-relaxed" id="dynamicInsightText">
-                            Adjust the filters to generate insights.
-                        </p>
+                    <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200 flex flex-col">
+                        <h2 class="text-sm font-bold text-slate-800 mb-1">Macro Resilience: Growth vs Net Margin</h2>
+                        <p class="text-[10px] text-gray-500 mb-2">Despite huge export volumes, heavy import reliance keeps Current Account (Net Margin) thin.</p>
+                        <div class="relative h-48 w-full">
+                            <canvas id="imfChart"></canvas>
+                        </div>
                     </div>
 
                 </div>
@@ -172,7 +170,7 @@
 
         <footer class="mt-4 pt-4 border-t border-gray-300 pb-6 text-[10px] text-gray-500">
             <h4 class="font-bold text-gray-700 uppercase tracking-wide mb-1">Data Sourcing</h4>
-            <p><strong>WTO:</strong> Merchandise exports by product group. <strong>UNCTAD:</strong> FDI inward/outward flows & WIR 2025. <strong>World Bank:</strong> GDP (current US$) for Trade Openness. <strong>GSO:</strong> FIE DVA modeled structurally at ~25% (assembly); Domestic DVA ~65%.</p>
+            <p><strong>WTO:</strong> Merchandise exports by product group. <strong>UNCTAD:</strong> FDI inward/outward flows & WIR 2025. <strong>World Bank:</strong> GDP for Trade Openness. <strong>IMF (WEO 2025):</strong> Real GDP Growth & Current Account Balance (% of GDP). <strong>GSO:</strong> FIE DVA modeled structurally at ~25% (assembly); Domestic DVA ~65%.</p>
         </footer>
     </div>
 
@@ -185,7 +183,10 @@
                     fie:   [126000, 154000, 174000, 190000, 203000, 241000, 267000, 254000, 290000],
                     dom:   [50581, 61014, 69699, 74268, 79629, 94978, 104288, 99782, 114824],
                     gdp:   [205300, 223800, 245200, 261900, 271200, 366100, 409000, 429700, 469600],
-                    usShare: [0.21, 0.20, 0.19, 0.23, 0.27, 0.28, 0.29, 0.28, 0.29]
+                    usShare: [0.21, 0.20, 0.19, 0.23, 0.27, 0.28, 0.29, 0.28, 0.29],
+                    // NEW IMF DATA
+                    imfGdpGrowth: [6.69, 6.94, 7.47, 7.36, 2.87, 2.55, 8.54, 5.07, 7.09],
+                    imfCurrentAccount: [0.25, -0.60, 1.90, 3.76, 4.35, -2.20, 0.34, 5.91, 6.10]
                 },
                 economics: { isDvaMode: false, dvaMultiplierFIE: 0.25, dvaMultiplierDom: 0.65 },
                 filters: { startYear: 2016, endYear: 2024, targetRegion: 'United States', shockPct: 0 },
@@ -254,6 +255,22 @@
                         onHover: (e, chartElement) => { e.native.target.style.cursor = chartElement[0] ? 'pointer' : 'default'; }
                     }
                 });
+
+                // NEW IMF Chart Instance
+                this.state.charts.imf = new Chart(document.getElementById('imfChart').getContext('2d'), {
+                    type: 'bar',
+                    data: { labels: [], datasets: [] },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6, font: {size: 10} } } },
+                        scales: {
+                            y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'Growth %', font: {size: 9}} },
+                            y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: {display: true, text: 'Margin %', font: {size: 9}} },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
             },
 
             bindEvents: function() {
@@ -300,18 +317,22 @@
                 const sliceTotal = sliceFie.map((v, i) => v + sliceDom[i]); 
                 const sliceGdp = this.state.data.gdp.slice(sIdx, eIdx + 1);
                 const sliceUsShare = this.state.data.usShare.slice(sIdx, eIdx + 1);
+                const sliceImfGrowth = this.state.data.imfGdpGrowth.slice(sIdx, eIdx + 1);
+                const sliceImfCurrentAcct = this.state.data.imfCurrentAccount.slice(sIdx, eIdx + 1);
 
-                let sumFiePct = 0, sumTotal = 0, sumUsShare = 0, sumGdp = 0;
+                let sumFiePct = 0, sumTotal = 0, sumUsShare = 0, sumGdp = 0, sumGrowth = 0;
                 for(let i=0; i<sliceTotal.length; i++) {
                     sumFiePct += (sliceFie[i] / sliceTotal[i]) * 100;
                     sumTotal += sliceTotal[i];
                     sumUsShare += sliceUsShare[i];
                     sumGdp += sliceGdp[i];
+                    sumGrowth += sliceImfGrowth[i];
                 }
                 const avgAnnualTotal = sumTotal / sliceTotal.length;
                 const avgUsShare = sumUsShare / sliceUsShare.length;
                 const avgFiePct = (sumFiePct / sliceTotal.length);
                 const tradeOpennessPct = (sumTotal / sumGdp) * 100;
+                const avgGdpGrowth = (sumGrowth / sliceTotal.length);
 
                 const weights = { ...this.state.geopolitics.baseWeights };
                 weights['United States'] = avgUsShare;
@@ -319,48 +340,29 @@
                 const currentActiveShare = weights[targetRegion];
 
                 const lossAmount = avgAnnualTotal * currentActiveShare * shockPct; 
-                // CRITICAL FIX: The simulated total is the baseline minus the loss.
                 const sliceStressedTotal = shockPct > 0 ? sliceTotal.map(v => v - (v * currentActiveShare * shockPct)) : [];
 
-                this.renderDOM(avgFiePct, tradeOpennessPct, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode);
-                this.renderCharts(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, weights, targetRegion, isDvaMode, shockPct);
-                this.generateInsight(targetRegion, shockPct, lossAmount, isDvaMode, avgFiePct);
+                this.renderDOM(avgFiePct, tradeOpennessPct, avgGdpGrowth, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode);
+                this.renderCharts(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceImfGrowth, sliceImfCurrentAcct, weights, targetRegion, isDvaMode, shockPct);
             },
 
-            generateInsight: function(region, shock, loss, isDvaMode, fiePct) {
-                const box = document.getElementById('dynamicInsightText');
-                let text = "";
-                
-                if (shock > 0) {
-                    text = `A <strong class="text-vn-red">${shock*100}% demand shock</strong> from the ${region} would immediately erase <strong class="text-white">$${(loss/1000).toFixed(1)} Billion</strong> in export volume. `;
-                    if (isDvaMode) text += `Because you are viewing Value Added, this represents actual capital wiped out from the local Vietnamese economy, bypassing FIE assembly buffers.`;
-                    else text += `However, because you are viewing Gross Volume, the actual pain to local wages is masked by FIE component imports.`;
-                } else if (isDvaMode) {
-                    text = `Notice how FIE dominance drops to <strong class="text-white">${fiePct.toFixed(1)}%</strong> when adjusting for Domestic Value Added. While Vietnam looks like a manufacturing titan on paper, they are highly dependent on foreign supply chains (primarily China) for components.`;
-                } else {
-                    text = `Currently analyzing Gross Export Volume. The ${region} accounts for a massive portion of trade, creating high geopolitical vulnerability. Toggle 'Value Added' to see how much of this revenue actually stays in Vietnam.`;
-                }
-                box.innerHTML = text;
-            },
-
-            renderDOM: function(avgFiePct, tradeOpennessPct, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode) {
+            renderDOM: function(avgFiePct, tradeOpennessPct, avgGdpGrowth, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode) {
                 document.getElementById('activeRegionLabel').innerText = targetRegion;
                 document.getElementById('activeRegionLabel').style.borderColor = this.state.geopolitics.colors[targetRegion];
                 document.getElementById('shockValue').innerText = '-' + (shockPct * 100) + '%';
                 
                 document.getElementById('kpi-fie-share').innerText = avgFiePct.toFixed(1) + '%';
                 document.getElementById('kpi-gdp-ratio').innerText = tradeOpennessPct.toFixed(1) + '%';
+                document.getElementById('kpi-gdp-growth').innerText = avgGdpGrowth.toFixed(2) + '%';
                 document.getElementById('kpi-target-exposure').innerText = (currentActiveShare * 100).toFixed(1) + '%';
-                document.getElementById('kpi-target-label').innerText = targetRegion + ' share';
                 document.getElementById('kpi-loss').innerText = '$' + (lossAmount / 1000).toFixed(2) + ' B';
 
                 document.getElementById('chart1Title').innerText = isDvaMode ? 'Export Ownership: Domestic Value Added (DVA)' : 'Export Ownership vs. Stress Scenario';
                 document.getElementById('kpiLabel1').innerText = isDvaMode ? 'FIE Share of Value Added' : 'Avg FIE Export Dominance';
             },
 
-            renderCharts: function(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, weights, targetRegion, isDvaMode, shockPct) {
+            renderCharts: function(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceImfGrowth, sliceImfCurrentAcct, weights, targetRegion, isDvaMode, shockPct) {
                 
-                // ADD THE BASELINE TOTAL SO THE SHOCK DROP IS VISIBLE
                 const datasets = [
                     { label: 'Total Exports (Historical Baseline)', data: sliceTotal, borderColor: '#475569', backgroundColor: 'transparent', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0 },
                     { label: 'FIE Exports', data: sliceFie, backgroundColor: isDvaMode ? 'rgba(218, 37, 29, 0.2)' : 'rgba(218, 37, 29, 0.6)', borderColor: '#DA251D', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 1 },
@@ -371,13 +373,13 @@
                     datasets.push({
                         label: `Simulated Total (-${shockPct*100}% ${targetRegion} Shock)`,
                         data: sliceStressedTotal,
-                        borderColor: '#DA251D', // Bright red to show danger
+                        borderColor: '#DA251D', 
                         backgroundColor: 'transparent',
                         borderWidth: 3,
                         borderDash: [6, 4],
                         fill: false,
                         tension: 0.3,
-                        pointRadius: 4,
+                        pointRadius: 3,
                         pointBackgroundColor: '#DA251D'
                     });
                 }
@@ -390,6 +392,16 @@
                     (weights['ASEAN']*100).toFixed(1), (weights['Rest of World']*100).toFixed(1)
                 ];
                 this.state.charts.dest.update();
+
+                // IMF Macro Chart
+                this.state.charts.imf.data = {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Real GDP Growth (%)', data: sliceImfGrowth, type: 'line', borderColor: '#10b981', backgroundColor: '#10b981', borderWidth: 2, yAxisID: 'y', tension: 0.3, pointRadius: 3 },
+                        { label: 'Current Acct Balance (% of GDP)', data: sliceImfCurrentAcct, type: 'bar', backgroundColor: '#94a3b8', yAxisID: 'y1', barPercentage: 0.5 }
+                    ]
+                };
+                this.state.charts.imf.update();
             }
         };
 
