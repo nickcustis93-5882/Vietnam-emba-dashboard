@@ -307,7 +307,6 @@
                 document.getElementById('dvaToggle').addEventListener('change', (e) => {
                     this.state.economics.isDvaMode = e.target.checked;
                     const grossTxt = document.getElementById('modeGrossText');
-                    
                     if(this.state.economics.isDvaMode) {
                         grossTxt.classList.remove('font-bold', 'text-slate-800');
                         grossTxt.classList.add('text-slate-400');
@@ -402,7 +401,6 @@
                 document.getElementById('kpi-fie-share').innerText = avgFiePct.toFixed(1) + '%';
                 document.getElementById('kpi-trade-gdp').innerText = avgTradeGdp.toFixed(1) + '%';
                 document.getElementById('kpi-current-account').innerText = avgCurrentAcct.toFixed(1) + '%';
-                document.getElementById('kpi-target-exposure').innerText = (currentActiveShare * 100).toFixed(1) + '%';
                 document.getElementById('kpi-loss').innerText = '$' + (lossAmount / 1000).toFixed(2) + ' B';
 
                 document.getElementById('chart1Title').innerText = isDvaMode ? 'Export Ownership: Domestic Value Added (DVA)' : 'Export Ownership vs. Stress Scenario';
