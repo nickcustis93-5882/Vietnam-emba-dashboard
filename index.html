@@ -42,7 +42,7 @@
 
     <div id="loader" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-vn-red mb-4"></div>
-        <p class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Compiling World Bank Data...</p>
+        <p class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Compiling 5 Data Sources...</p>
     </div>
 
     <div class="max-w-[1400px] mx-auto space-y-5 opacity-0 transition-opacity duration-1000" id="app-container">
@@ -78,9 +78,9 @@
                 <span class="text-xs text-gray-500 mt-1 font-medium">Trade as % of GDP (WB Data)</span>
             </div>
             <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Target Market Exposure</span>
-                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-target-exposure">--</span>
-                <span class="text-xs text-gray-500 mt-1 font-medium" id="kpi-target-label">United States share</span>
+                <span class="text-[10px] font-bold text-blue-600 uppercase tracking-wider">Avg Net Trade Margin</span>
+                <span class="text-2xl font-bold text-slate-800 mt-1 block" id="kpi-current-account">--</span>
+                <span class="text-[10px] text-gray-500 mt-1 font-medium leading-tight block">Current Account % of GDP (IMF)</span>
             </div>
             <div class="bg-red-50 rounded-xl shadow-sm p-4 border border-red-200">
                 <span class="text-[10px] font-bold text-vn-darkred uppercase tracking-wider" id="kpiLossLabel">Simulated Annual Loss</span>
@@ -179,13 +179,15 @@
         </div>
 
         <footer class="mt-4 pt-4 border-t border-gray-300 pb-6 text-[10px] text-gray-600">
-            <h4 class="font-bold text-gray-800 uppercase tracking-wide mb-2 text-xs">Data Sources & Provenance</h4>
-            <ul class="list-disc pl-5 space-y-1">
-                <li><strong>World Bank DataBank:</strong> Series [BX.KLT.DINV.CD.WD] (FDI net inflows); [TX.VAL.TECH.MF.ZS] (High-tech exports); [NE.TRD.GNFS.ZS] (Trade % of GDP); [NY.GDP.MKTP.KD.ZG] (GDP growth).</li>
-                <li><strong>World Trade Organization (WTO):</strong> Merchandise exports by product group.</li>
-                <li><strong>UNCTAD:</strong> World Investment Report 2025 Fact Sheet & FDI Statistics.</li>
-                <li><strong>GSO / Macro Estimates:</strong> FIE Domestic Value Added (DVA) modeled structurally at ~25% due to high import reliance (assembly function). Domestic DVA modeled at ~65%.</li>
+            <h4 class="font-bold text-gray-800 uppercase tracking-wide mb-2 text-xs">Data Sources & Provenance (5 Uploaded Files)</h4>
+            <ul class="list-decimal pl-5 space-y-1">
+                <li><strong>World Bank DataBank (.xls):</strong> Series [NE.TRD.GNFS.ZS] (Trade % of GDP); [TX.VAL.TECH.MF.ZS] (High-tech exports); [NY.GDP.MKTP.KD.ZG] (GDP growth).</li>
+                <li><strong>IMF World Economic Outlook (.xlsx):</strong> Current Account Balance (% of GDP) representing the net trade margin.</li>
+                <li><strong>World Trade Organization (.xlsx):</strong> Merchandise exports by product group (Gross export volumes).</li>
+                <li><strong>UNCTADstat Data Center (.csv):</strong> Historical FDI inward and outward flows.</li>
+                <li><strong>World Investment Report - Fact Sheet (.pdf):</strong> Baseline FDI stock and inward capital verification.</li>
             </ul>
+            <p class="mt-3 italic text-[9px] text-gray-400">Note: GSO / Macro Estimates used to model FIE Domestic Value Added (DVA) structurally at ~25% due to high import reliance (assembly function). Domestic DVA modeled at ~65%.</p>
         </footer>
     </div>
 
@@ -194,13 +196,17 @@
             state: {
                 years: [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
                 data: {
+                    // WTO
                     total: [176581, 215014, 243699, 264268, 282629, 335978, 371288, 353782, 404824],
                     fie:   [126000, 154000, 174000, 190000, 203000, 241000, 267000, 254000, 290000],
                     dom:   [50581, 61014, 69699, 74268, 79629, 94978, 104288, 99782, 114824],
                     usShare: [0.21, 0.20, 0.19, 0.23, 0.27, 0.28, 0.29, 0.28, 0.29],
+                    // WORLD BANK
                     tradeToGdp: [145.4, 161.0, 164.7, 164.7, 163.2, 186.7, 183.2, 164.8, 173.9],
                     highTechPct: [38.1, 41.7, 40.8, 40.4, 41.7, 41.5, 42.7, 44.3, 44.3],
-                    gdpGrowth: [6.69, 6.94, 7.47, 7.36, 2.87, 2.55, 8.54, 5.07, 7.09]
+                    gdpGrowth: [6.69, 6.94, 7.47, 7.36, 2.87, 2.55, 8.54, 5.07, 7.09],
+                    // IMF
+                    currentAccount: [0.25, -0.60, 1.90, 3.76, 4.35, -2.20, 0.34, 5.91, 6.10]
                 },
                 economics: { isDvaMode: false, dvaMultiplierFIE: 0.25, dvaMultiplierDom: 0.65 },
                 filters: { startYear: 2016, endYear: 2024, targetRegion: 'United States', shockPct: 0 },
@@ -340,20 +346,23 @@
                 const sliceTradeGdp = this.state.data.tradeToGdp.slice(sIdx, eIdx + 1);
                 const sliceHighTech = this.state.data.highTechPct.slice(sIdx, eIdx + 1);
                 const sliceGrowth = this.state.data.gdpGrowth.slice(sIdx, eIdx + 1);
+                const sliceCurrentAcct = this.state.data.currentAccount.slice(sIdx, eIdx + 1);
 
-                let sumFiePct = 0, sumTotal = 0, sumUsShare = 0, sumTradeGdp = 0, sumHighTech = 0;
+                let sumFiePct = 0, sumTotal = 0, sumUsShare = 0, sumTradeGdp = 0, sumHighTech = 0, sumCurrentAcct = 0;
                 for(let i=0; i<sliceTotal.length; i++) {
                     sumFiePct += (sliceFie[i] / sliceTotal[i]) * 100;
                     sumTotal += sliceTotal[i];
                     sumUsShare += sliceUsShare[i];
                     sumTradeGdp += sliceTradeGdp[i];
                     sumHighTech += sliceHighTech[i];
+                    sumCurrentAcct += sliceCurrentAcct[i];
                 }
                 const avgAnnualTotal = sumTotal / sliceTotal.length;
                 const avgUsShare = sumUsShare / sliceUsShare.length;
                 const avgFiePct = (sumFiePct / sliceTotal.length);
                 const avgTradeGdp = sumTradeGdp / sliceTradeGdp.length;
                 const avgHighTech = sumHighTech / sliceHighTech.length;
+                const avgCurrentAcct = sumCurrentAcct / sliceCurrentAcct.length;
 
                 const weights = { ...this.state.geopolitics.baseWeights };
                 weights['United States'] = avgUsShare;
@@ -363,12 +372,12 @@
                 const lossAmount = avgAnnualTotal * currentActiveShare * shockPct; 
                 const sliceStressedTotal = shockPct > 0 ? sliceTotal.map(v => v - (v * currentActiveShare * shockPct)) : [];
 
-                this.renderDOM(avgFiePct, avgTradeGdp, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode);
+                this.renderDOM(avgFiePct, avgTradeGdp, avgCurrentAcct, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode);
                 this.renderCharts(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceGrowth, sliceHighTech, weights, targetRegion, isDvaMode, shockPct);
-                this.generateInsight(targetRegion, shockPct, lossAmount, isDvaMode, avgFiePct, avgTradeGdp, avgHighTech);
+                this.generateInsight(targetRegion, shockPct, lossAmount, isDvaMode, avgFiePct, avgTradeGdp, avgCurrentAcct);
             },
 
-            generateInsight: function(region, shock, loss, isDvaMode, fiePct, tradeGdp, highTech) {
+            generateInsight: function(region, shock, loss, isDvaMode, fiePct, tradeGdp, currentAcct) {
                 const box = document.getElementById('dynamicInsightText');
                 let text = "";
                 
@@ -379,12 +388,12 @@
                 } else if (isDvaMode) {
                     text = `FIE dominance drops to <strong class="text-white">${fiePct.toFixed(1)}%</strong> when adjusting for Domestic Value Added. While high-tech exports drive the economy, Vietnam relies heavily on foreign supply chains for components, limiting retained wealth.`;
                 } else {
-                    text = `Vietnam is highly exposed, trading at <strong class="text-white">${tradeGdp.toFixed(1)}%</strong> of its GDP. The ${region} corridor creates immense geopolitical vulnerability. Toggle 'Value Added' above to see how much of this revenue actually stays in Vietnam.`;
+                    text = `Vietnam is highly exposed, trading at <strong class="text-white">${tradeGdp.toFixed(1)}%</strong> of its GDP. Furthermore, the IMF Net Trade Margin is only <strong class="text-white">${currentAcct.toFixed(1)}%</strong>. They export massively, but must import nearly as much to build those goods. Toggle 'Value Added' above to see the structural impact.`;
                 }
                 box.innerHTML = text;
             },
 
-            renderDOM: function(avgFiePct, avgTradeGdp, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode) {
+            renderDOM: function(avgFiePct, avgTradeGdp, avgCurrentAcct, currentActiveShare, shockPct, lossAmount, targetRegion, isDvaMode) {
                 document.getElementById('activeRegionLabel').innerText = targetRegion;
                 document.getElementById('activeRegionLabel').style.borderColor = this.state.geopolitics.colors[targetRegion];
                 document.getElementById('shockValue').innerText = '-' + (shockPct * 100) + '%';
@@ -392,6 +401,7 @@
                 
                 document.getElementById('kpi-fie-share').innerText = avgFiePct.toFixed(1) + '%';
                 document.getElementById('kpi-trade-gdp').innerText = avgTradeGdp.toFixed(1) + '%';
+                document.getElementById('kpi-current-account').innerText = avgCurrentAcct.toFixed(1) + '%';
                 document.getElementById('kpi-target-exposure').innerText = (currentActiveShare * 100).toFixed(1) + '%';
                 document.getElementById('kpi-loss').innerText = '$' + (lossAmount / 1000).toFixed(2) + ' B';
 
@@ -401,19 +411,18 @@
 
             renderCharts: function(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceGrowth, sliceHighTech, weights, targetRegion, isDvaMode, shockPct) {
                 
-                // EXPLICIT Z-INDEX / DRAWING ORDER APPLIED HERE
                 const datasets = [
                     { 
                         label: 'Total Exports (Historical Baseline)', data: sliceTotal, borderColor: '#475569', backgroundColor: 'transparent', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0, 
-                        order: 4 // Drawn on bottom
+                        order: 4
                     },
                     { 
                         label: 'FIE Exports', data: sliceFie, backgroundColor: isDvaMode ? 'rgba(218, 37, 29, 0.2)' : 'rgba(218, 37, 29, 0.7)', borderColor: '#DA251D', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2, 
-                        order: 3 // Drawn above total baseline
+                        order: 3
                     },
                     { 
                         label: 'Domestic Exports', data: sliceDom, backgroundColor: isDvaMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)', borderColor: isDvaMode ? '#10b981' : '#3b82f6', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2, 
-                        order: 2 // Drawn ON TOP of FIE Exports
+                        order: 2
                     }
                 ];
 
@@ -429,7 +438,7 @@
                         tension: 0.3,
                         pointRadius: 3,
                         pointBackgroundColor: '#DA251D',
-                        order: 1 // Drawn on the very top of everything
+                        order: 1 
                     });
                 }
 
