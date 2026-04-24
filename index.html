@@ -247,7 +247,6 @@
                         interaction: { mode: 'index', intersect: false }, 
                         plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6, font: {size: 11} } } },
                         scales: { 
-                            // Y-AXIS LABEL ADDED HERE
                             y: { 
                                 beginAtZero: true, 
                                 grid: { color: '#e2e8f0' },
@@ -302,6 +301,7 @@
                 document.getElementById('dvaToggle').addEventListener('change', (e) => {
                     this.state.economics.isDvaMode = e.target.checked;
                     const grossTxt = document.getElementById('modeGrossText');
+                    
                     if(this.state.economics.isDvaMode) {
                         grossTxt.classList.remove('font-bold', 'text-slate-800');
                         grossTxt.classList.add('text-slate-400');
@@ -401,11 +401,20 @@
 
             renderCharts: function(labels, sliceFie, sliceDom, sliceTotal, sliceStressedTotal, sliceGrowth, sliceHighTech, weights, targetRegion, isDvaMode, shockPct) {
                 
-                // COLOR UPDATE: Blue used for Domestic Exports for high contrast
+                // EXPLICIT Z-INDEX / DRAWING ORDER APPLIED HERE
                 const datasets = [
-                    { label: 'Total Exports (Historical Baseline)', data: sliceTotal, borderColor: '#475569', backgroundColor: 'transparent', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0 },
-                    { label: 'FIE Exports', data: sliceFie, backgroundColor: isDvaMode ? 'rgba(218, 37, 29, 0.2)' : 'rgba(218, 37, 29, 0.7)', borderColor: '#DA251D', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2 },
-                    { label: 'Domestic Exports', data: sliceDom, backgroundColor: isDvaMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)', borderColor: isDvaMode ? '#10b981' : '#3b82f6', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2 }
+                    { 
+                        label: 'Total Exports (Historical Baseline)', data: sliceTotal, borderColor: '#475569', backgroundColor: 'transparent', borderWidth: 2, fill: false, tension: 0.3, pointRadius: 0, 
+                        order: 4 // Drawn on bottom
+                    },
+                    { 
+                        label: 'FIE Exports', data: sliceFie, backgroundColor: isDvaMode ? 'rgba(218, 37, 29, 0.2)' : 'rgba(218, 37, 29, 0.7)', borderColor: '#DA251D', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2, 
+                        order: 3 // Drawn above total baseline
+                    },
+                    { 
+                        label: 'Domestic Exports', data: sliceDom, backgroundColor: isDvaMode ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)', borderColor: isDvaMode ? '#10b981' : '#3b82f6', fill: true, tension: 0.3, pointRadius: 2, borderWidth: 2, 
+                        order: 2 // Drawn ON TOP of FIE Exports
+                    }
                 ];
 
                 if (shockPct > 0) {
@@ -419,7 +428,8 @@
                         fill: false,
                         tension: 0.3,
                         pointRadius: 3,
-                        pointBackgroundColor: '#DA251D'
+                        pointBackgroundColor: '#DA251D',
+                        order: 1 // Drawn on the very top of everything
                     });
                 }
 
