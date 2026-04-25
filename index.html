@@ -433,17 +433,17 @@
                 this.state.charts.ownership.data = { labels: labels, datasets: datasets };
                 this.state.charts.ownership.update();
 
-                // 2. Google GeoChart (Map)
+                // 2. Google GeoChart (Map) - COLOR UPDATE HERE
                 const mapArray = [['Country', 'Export Share (%)']];
                 for (const [code, info] of Object.entries(this.state.destinations)) {
-                    mapArray.push([code, info.share * 100]); // Convert to % for tooltip display
+                    mapArray.push([code, info.share * 100]); 
                 }
                 this.currentMapData = google.visualization.arrayToDataTable(mapArray);
                 
                 const mapOptions = {
-                    colorAxis: {colors: ['#fca5a5', '#fbbf24', '#10b981', '#064e3b']}, // Red -> Yellow -> Green -> Dark Green Heatmap
+                    colorAxis: {colors: ['#dcfce7', '#86efac', '#22c55e', '#14532d']}, // Light Green -> Dark Green Heatmap
                     backgroundColor: 'transparent',
-                    datalessRegionColor: '#e2e8f0', // Light slate for countries with no data
+                    datalessRegionColor: '#e2e8f0', 
                     defaultColor: '#f1f5f9',
                     legend: 'none',
                     tooltip: {textStyle: {fontName: 'Inter', fontSize: 12}}
