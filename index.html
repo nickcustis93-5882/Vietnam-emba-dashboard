@@ -31,6 +31,7 @@
     <style>
         body { background-color: #f1f5f9; }
         input[type=range] { accent-color: #DA251D; }
+        #destinationChart { cursor: pointer; }
         .toggle-checkbox:checked { right: 0; border-color: #10b981; }
         .toggle-checkbox:checked + .toggle-label { background-color: #10b981; }
         .toggle-checkbox { right: auto; left: 0; transition: all 0.3s; }
@@ -42,7 +43,7 @@
 
     <div id="loader" class="fixed inset-0 z-50 bg-slate-900 flex flex-col items-center justify-center">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-vn-red mb-4"></div>
-        <p class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Rendering Global Maps & Data...</p>
+        <p class="text-sm font-semibold text-gray-400 uppercase tracking-widest">Compiling 5 Data Sources...</p>
     </div>
 
     <div class="max-w-[1400px] mx-auto space-y-5 opacity-0 transition-opacity duration-1000" id="app-container">
@@ -61,7 +62,7 @@
                     </h1>
                 </div>
                 <p class="text-gray-400 text-sm leading-relaxed max-w-5xl">
-                    Vietnam's $400B export machine is structurally fragile. Nearly 75% of exports are controlled by Foreign Invested Enterprises (FIEs) operating as assembly enclaves. Adjust the economic lens, isolate geopolitical corridors on the map, and stress-test target markets to reveal systemic vulnerabilities.
+                    Vietnam's $400B export machine is structurally fragile. Nearly 75% of exports are controlled by Foreign Invested Enterprises (FIEs) operating as assembly enclaves. Adjust the economic lens, isolate geopolitical corridors, and stress-test target markets to reveal systemic vulnerabilities.
                 </p>
             </div>
         </header>
@@ -159,7 +160,11 @@
                     
                     <div class="bg-white rounded-xl shadow-sm p-5 border border-gray-200 relative group flex flex-col">
                         <div class="absolute top-2 right-2 bg-slate-800 text-white text-[9px] font-bold px-2 py-1 rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity z-10">Click Country to Target</div>
-                        <h2 class="text-sm font-bold text-slate-800 mb-1">Global Export Heatmap</h2>
+                        <h2 class="text-sm text-slate-800 mb-1">
+                            <span class="font-bold">Global Export Heatmap</span> 
+                            <span class="font-normal text-gray-400 mx-1">|</span> 
+                            <span class="italic font-normal">Top 15 Countries</span>
+                        </h2>
                         <p class="text-[10px] text-gray-500 mb-2">Dark green indicates high dependency. Click a country to test.</p>
                         <div class="relative h-60 w-full flex justify-center mt-auto bg-slate-50 border border-slate-100 rounded overflow-hidden">
                             <div id="mapChart" class="w-full h-full"></div>
@@ -179,14 +184,15 @@
         </div>
 
         <footer class="mt-4 pt-4 border-t border-gray-300 pb-6 text-[10px] text-gray-600">
-            <h4 class="font-bold text-gray-800 uppercase tracking-wide mb-2 text-xs">Data Sources & Provenance</h4>
+            <h4 class="font-bold text-gray-800 uppercase tracking-wide mb-2 text-xs">Data Sources & Provenance (5 Uploaded Files)</h4>
             <ul class="list-decimal pl-5 space-y-1">
-                <li><strong>World Bank DataBank (.xls):</strong> Series [NE.TRD.GNFS.ZS] (Trade %); [TX.VAL.TECH.MF.ZS] (High-tech %); [NY.GDP.MKTP.KD.ZG] (GDP growth).</li>
-                <li><strong>IMF World Economic Outlook (.xlsx):</strong> Current Account Balance (% of GDP).</li>
-                <li><strong>World Trade Organization (.xlsx):</strong> Merchandise exports.</li>
-                <li><strong>UNCTADstat Data Center (.csv):</strong> Historical FDI flows.</li>
-                <li><strong>World Investment Report (.pdf):</strong> FDI inward capital verification.</li>
+                <li><strong>World Bank DataBank (.xls):</strong> Series [NE.TRD.GNFS.ZS] (Trade % of GDP); [TX.VAL.TECH.MF.ZS] (High-tech exports); [NY.GDP.MKTP.KD.ZG] (GDP growth).</li>
+                <li><strong>IMF World Economic Outlook (.xlsx):</strong> Current Account Balance (% of GDP) representing the net trade margin.</li>
+                <li><strong>World Trade Organization (.xlsx):</strong> Merchandise exports by product group (Gross export volumes).</li>
+                <li><strong>UNCTADstat Data Center (.csv):</strong> Historical FDI inward and outward flows.</li>
+                <li><strong>World Investment Report - Fact Sheet (.pdf):</strong> Baseline FDI stock and inward capital verification.</li>
             </ul>
+            <p class="mt-3 italic text-[9px] text-gray-400">Note: GSO / Macro Estimates used to model FIE Domestic Value Added (DVA) structurally at ~25% due to high import reliance (assembly function). Domestic DVA modeled at ~65%.</p>
         </footer>
     </div>
 
@@ -195,13 +201,16 @@
             state: {
                 years: [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024],
                 data: {
+                    // WTO
                     total: [176581, 215014, 243699, 264268, 282629, 335978, 371288, 353782, 404824],
                     fie:   [126000, 154000, 174000, 190000, 203000, 241000, 267000, 254000, 290000],
                     dom:   [50581, 61014, 69699, 74268, 79629, 94978, 104288, 99782, 114824],
                     usShare: [0.21, 0.20, 0.19, 0.23, 0.27, 0.28, 0.29, 0.28, 0.29],
+                    // WORLD BANK
                     tradeToGdp: [145.4, 161.0, 164.7, 164.7, 163.2, 186.7, 183.2, 164.8, 173.9],
                     highTechPct: [38.1, 41.7, 40.8, 40.4, 41.7, 41.5, 42.7, 44.3, 44.3],
                     gdpGrowth: [6.69, 6.94, 7.47, 7.36, 2.87, 2.55, 8.54, 5.07, 7.09],
+                    // IMF
                     currentAccount: [0.25, -0.60, 1.90, 3.76, 4.35, -2.20, 0.34, 5.91, 6.10]
                 },
                 economics: { isDvaMode: false, dvaMultiplierFIE: 0.25, dvaMultiplierDom: 0.65 },
@@ -267,7 +276,11 @@
                         interaction: { mode: 'index', intersect: false }, 
                         plugins: { legend: { position: 'top', labels: { usePointStyle: true, boxWidth: 6, font: {size: 11} } } },
                         scales: { 
-                            y: { beginAtZero: true, grid: { color: '#e2e8f0' }, title: { display: true, text: 'Millions USD', font: { size: 11, weight: 'bold' } } }, 
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: '#e2e8f0' },
+                                title: { display: true, text: 'Millions USD', font: { size: 11, weight: 'bold' } }
+                            }, 
                             x: { grid: { display: false } } 
                         } 
                     }
@@ -280,7 +293,6 @@
                 google.visualization.events.addListener(this.state.charts.map, 'select', () => {
                     const selection = this.state.charts.map.getSelection();
                     if (selection.length > 0) {
-                        // We extract the internal data table row to get the clicked country code
                         const countryCode = this.currentMapData.getValue(selection[0].row, 0);
                         if (this.state.destinations[countryCode]) {
                             this.state.filters.targetCode = countryCode;
